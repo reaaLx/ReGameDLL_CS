@@ -1663,7 +1663,7 @@ bool UTIL_AreBotsAllowed()
 	if (AreRunningCZero())
 	{
 #ifdef REGAMEDLL_ADD
-		if (g_engfuncs.pfnEngCheckParm == nullptr)
+		if (g_engfuncs.pfnCheckParm == nullptr)
 			return false;
 
 		// If they pass in -nobots, don't allow bots.  This is for people who host servers, to
@@ -1694,7 +1694,7 @@ bool UTIL_AreBotsAllowed()
 bool UTIL_IsBeta()
 {
 #ifdef BUILD_LATEST
-	if (g_engfuncs.pfnEngCheckParm == nullptr)
+	if (g_engfuncs.pfnCheckParm == nullptr)
 		return false;
 
 	// always beta from listen server

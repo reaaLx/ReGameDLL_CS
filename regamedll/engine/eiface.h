@@ -291,19 +291,18 @@ typedef struct enginefuncs_s
 	void		(*pfnProcessTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
 	void		(*pfnConstructTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
 	void		(*pfnResetTutorMessageDecayData)		( void );
-
-	// Added 2005/08/11 (no SDK update):
-	void(*pfnQueryClientCvarValue)		(const edict_t *player, const char *cvarName);
-
-	// Added 2005/11/21 (no SDK update):
-	void(*pfnQueryClientCvarValue2)		(const edict_t *player, const char *cvarName, int requestID);
-
-	// Added 2009/06/19 (no SDK update):
-	int(*pfnEngCheckParm)				(const char *pchCmdLineToken, char **ppnext);
-
-	// Added 2019/06/26 (no SDK update):
-	// Commented out this for backward compatibility
-	//edict_t *(*pfnPEntityOfEntIndexAllEntities)(int iEntIndex);
+	// Counter-Strike NEO engine extensions (Namco). Order and count must match the NEO
+	// engine function table (165 entries, 660 bytes). Do not reorder.
+	void		(*pfnSetPlaceData)					(int placeId, const char *data);
+	void		(*pfnSetNEO2Rule)					(int rule);
+	int			(*pfnGetNEO2Rule)					(void);
+	void		(*pfnTakaSetNumChangeLevel)			(int num);
+	const char *(*pfnTakaGetNextLevelName)			(void);
+	int			(*pfnCheckParm)						(const char *parm, char **ppnext);
+	int			(*pfnGetRateLevel)					(int player);
+	void		(*pfnPrecachePlayerModel)			(void);
+	const char *(*pfnGetPlayerModelFileName)		(const char *model);
+	const char *(*pfnGetSaveDir)					(void);
 
 } enginefuncs_t;
 
