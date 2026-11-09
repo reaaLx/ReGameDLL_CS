@@ -7,8 +7,6 @@
 #include "neo/neo_stub.h"
 
 int CHalfLifeMultiplay::CheckNEO2Rule() { NEO_STUB("CHalfLifeMultiplay::CheckNEO2Rule"); return {}; }
-int CHalfLifeMultiplay::CheckNEO2RuleforChargeOnly5() { NEO_STUB("CHalfLifeMultiplay::CheckNEO2RuleforChargeOnly5"); return {}; }
-void CHalfLifeMultiplay::SetNEO2RuleMode(int) { NEO_STUB("CHalfLifeMultiplay::SetNEO2RuleMode"); }
 void CHalfLifeMultiplay::InitializeNEO2Rule() { NEO_STUB("CHalfLifeMultiplay::InitializeNEO2Rule"); }
 void CCSBot::TacticalGrenade() { NEO_STUB("CCSBot::TacticalGrenade"); }
 void CCSBot::TacticalMove() { NEO_STUB("CCSBot::TacticalMove"); }

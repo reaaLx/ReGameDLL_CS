@@ -855,6 +855,11 @@ protected:
 	int CheckNEO2Rule();
 	int CheckNEO2RuleforChargeOnly5();
 	void SetNEO2RuleMode(int);
+	// NEO 2 rule state (names are ours; NEO build offsets in comments)
+	int m_iNEO2RuleMode;				// current NEO 2 rule mode (NEO offset 0x2d0)
+	float m_flNEO2ChargeAnchor;		// base time for the charge-window check (NEO 0x2d8)
+	int m_iNEO2ChargeFlag;			// charge flag used by CheckNEO2RuleforChargeOnly5 (NEO 0x2dc)
+	float m_flNEO2ChargeThreshold;		// threshold multiplier for the charge window (NEO 0x30c)
 	void InitializeNEO2Rule();
 };
 

@@ -367,6 +367,11 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
 	m_bFreezePeriod = TRUE;
 
+	m_iNEO2RuleMode = 0;
+	m_flNEO2ChargeAnchor = 0.0f;
+	m_iNEO2ChargeFlag = 0;
+	m_flNEO2ChargeThreshold = 0.0f;
+
 	m_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
 	RefreshSkillData();
 	Q_memcpy(m_rgRewardAccountRules, m_rgRewardAccountRules_default, sizeof(m_rgRewardAccountRules));

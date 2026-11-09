@@ -200,6 +200,7 @@ set(GAMEDLL_SRCS
 	"dlls/neo/bot.cpp"
 	"dlls/neo/crm.cpp"
 	"dlls/neo/popup.cpp"
+	"dlls/neo/rules_neo2.cpp"
 	"dlls/neo/rules.cpp"
 	"dlls/neo/training.cpp"
 	"dlls/ammo.cpp"
