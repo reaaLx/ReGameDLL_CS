@@ -27,6 +27,12 @@
     <ClCompile Include="..\dlls\addons\point_command.cpp" />
     <ClCompile Include="..\dlls\addons\trigger_random.cpp" />
     <ClCompile Include="..\dlls\addons\trigger_setorigin.cpp" />
+    <ClCompile Include="..\dlls\neo\bot.cpp" />
+    <ClCompile Include="..\dlls\neo\crm.cpp" />
+    <ClCompile Include="..\dlls\neo\existing.cpp" />
+    <ClCompile Include="..\dlls\neo\popup.cpp" />
+    <ClCompile Include="..\dlls\neo\rules.cpp" />
+    <ClCompile Include="..\dlls\neo\training.cpp" />
     <ClCompile Include="..\dlls\airtank.cpp" />
     <ClCompile Include="..\dlls\ammo.cpp" />
     <ClCompile Include="..\dlls\animating.cpp" />
@@ -617,6 +623,12 @@
     <ClInclude Include="..\dlls\addons\point_command.h" />
     <ClInclude Include="..\dlls\addons\trigger_random.h" />
     <ClInclude Include="..\dlls\addons\trigger_setorigin.h" />
+    <ClInclude Include="..\dlls\neo\bot.h" />
+    <ClInclude Include="..\dlls\neo\crm.h" />
+    <ClInclude Include="..\dlls\neo\neo_stub.h" />
+    <ClInclude Include="..\dlls\neo\popup.h" />
+    <ClInclude Include="..\dlls\neo\rules.h" />
+    <ClInclude Include="..\dlls\neo\training.h" />
     <ClInclude Include="..\dlls\airtank.h" />
     <ClInclude Include="..\dlls\ammo.h" />
     <ClInclude Include="..\dlls\animation.h" />

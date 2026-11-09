@@ -849,6 +849,13 @@ protected:
 	float m_flTimeLimit;
 	float m_flGameStartTime;
 	bool m_bTeamBalanced;
+
+	// NEO additions (declarations only; implementation stubs in neo/existing.cpp)
+	public:
+	int CheckNEO2Rule();
+	int CheckNEO2RuleforChargeOnly5();
+	void SetNEO2RuleMode(int);
+	void InitializeNEO2Rule();
 };
 
 typedef struct mapcycle_item_s

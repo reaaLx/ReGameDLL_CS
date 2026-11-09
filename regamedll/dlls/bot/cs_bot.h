@@ -1018,6 +1018,15 @@ private:
 #ifdef REGAMEDLL_ADD
 	bool IsNoticable(const CBasePlayer *pPlayer, unsigned char visibleParts) const;	// return true if we "notice" given player
 #endif
+
+	// NEO additions (declarations only; implementation stubs in neo/existing.cpp)
+	public:
+	void TacticalGrenade();
+	void TacticalMove();
+	void TacticalWait();
+	int SelectGodEyeTarget();
+	int KillDeathRubberBand();
+	int SetRubberBandAim(int);
 };
 
 // Inlines

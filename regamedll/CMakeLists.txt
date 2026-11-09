@@ -196,6 +196,12 @@ set(SHARED_SRCS
 
 set(GAMEDLL_SRCS
 	"dlls/airtank.cpp"
+	"dlls/neo/existing.cpp"
+	"dlls/neo/bot.cpp"
+	"dlls/neo/crm.cpp"
+	"dlls/neo/popup.cpp"
+	"dlls/neo/rules.cpp"
+	"dlls/neo/training.cpp"
 	"dlls/ammo.cpp"
 	"dlls/animating.cpp"
 	"dlls/animation.cpp"
