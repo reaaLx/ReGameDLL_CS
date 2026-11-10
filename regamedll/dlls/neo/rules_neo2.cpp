@@ -238,10 +238,9 @@ void CHalfLifeMultiplay::UpdateTeamDeathCounter()
 		m_iNEO2Extra[3] += m_iNumTerrorist - CheckAliveCount(TERRORIST);
 	}
 
-	// NOT YET SENT: the original follows this with two MESSAGE_BEGIN(MSG_ALL, TeamScore)
-	// blocks, each writing team name, CT/T wins (m_iNumCTWins / m_iNumTerroristWins) and
-	// GetTeamBattlePoint. That is a third field beyond the fork's TeamScore message, so
-	// its wire format needs a decision before it is sent.
+	// The original sends the TeamScore pair with battle points as a third field. Only the
+	// fork's two-field format (team name and wins) is sent here, via UpdateTeamScores().
+	UpdateTeamScores();
 }
 
 // The original reads these from a per-player CCRM (keys 0 and 1). Here they use the
