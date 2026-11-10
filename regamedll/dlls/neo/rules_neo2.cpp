@@ -156,6 +156,9 @@ void CHalfLifeMultiplay::InitializeNEO2Rule()
 		g_engfuncs.pfnCVarSetFloat("mp_maxaccount", 16000.0f);
 		g_engfuncs.pfnCVarSetFloat("mp_startmoney", 800.0f);
 	}
+	// Round limit and win threshold come from cvars. The beginner modes read tr_maxrounds.
+	m_iNEO2RoundLimit = static_cast<int>(g_engfuncs.pfnCVarGetFloat(IsBeginnerMode() ? "tr_maxrounds" : "mp_maxrounds"));
+	m_iNEO2Threshold = static_cast<int>(g_engfuncs.pfnCVarGetFloat("mp_winlimit"));
 }
 
 int CHalfLifeMultiplay::GetAddTeamPointNum(int team)
@@ -282,16 +285,16 @@ int CHalfLifeMultiplay::CheckNEO2Rule()
 	const int limit = m_iNEO2RoundLimit;
 	int *t = m_iNEO2Tallies;
 
-	if (m_iNEO2Field6c <= 0)
+	if (m_iRoundWinStatus <= 0)
 		return 0;
 
 	m_iNEO2RoundCount++;
 
-	if (m_iNEO2Field6c == 2 || m_iNEO2Field6c == 4 || m_iNEO2Field6c == 8)
+	if (m_iRoundWinStatus == 2 || m_iRoundWinStatus == 4 || m_iRoundWinStatus == 8)
 	{
 		if (m_iNEO2ChargeFlag == 1) t[1]++; else t[0]++;
 	}
-	else if (m_iNEO2Field6c == 1 || m_iNEO2Field6c == 5 || m_iNEO2Field6c == 6 || m_iNEO2Field6c == 7)
+	else if (m_iRoundWinStatus == 1 || m_iRoundWinStatus == 5 || m_iRoundWinStatus == 6 || m_iRoundWinStatus == 7)
 	{
 		if (m_iNEO2ChargeFlag == 1) t[3]++; else t[2]++;
 	}
