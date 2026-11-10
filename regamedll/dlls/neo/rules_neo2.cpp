@@ -204,3 +204,42 @@ void CHalfLifeMultiplay::UpdateTeamC4PlantedTime(bool planted_by_ct)
 	m_sNEO2PlantTime[side] = static_cast<short>(m_sNEO2PlantTime[side] + remaining);
 	m_sNEO2PlantCount[side] = static_cast<short>(m_sNEO2PlantCount[side] + 1);
 }
+
+int CHalfLifeMultiplay::CheckAliveCount(int team)
+{
+	int count = 0;
+	CBaseEntity *pEntity = UTIL_FindEntityByClassname(NULL, "player");
+	while (pEntity && !FNullEnt(pEntity->edict()))
+	{
+		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pEntity);
+		if (pPlayer && static_cast<int>(pPlayer->m_iTeam) == team && pPlayer->IsAlive())
+			count++;
+		pEntity = UTIL_FindEntityByClassname(pEntity, "player");
+	}
+	return count;
+}
+
+void CHalfLifeMultiplay::UpdateTeamDeathCounter()
+{
+	if (m_iNEO2TallyGate == 1)
+		return;
+	if (m_iNEO2RoundCount == 0)
+		return;
+
+	// Opposing-side alive counts are subtracted from the team totals and accumulated.
+	if (m_iNEO2ChargeFlag != 1)
+	{
+		m_iNEO2Extra[0] += m_iNumCT - CheckAliveCount(CT);
+		m_iNEO2Extra[2] += m_iNumTerrorist - CheckAliveCount(TERRORIST);
+	}
+	else
+	{
+		m_iNEO2Extra[1] += m_iNumCT - CheckAliveCount(CT);
+		m_iNEO2Extra[3] += m_iNumTerrorist - CheckAliveCount(TERRORIST);
+	}
+
+	// NOT YET SENT: the original follows this with two MESSAGE_BEGIN(MSG_ALL, TeamScore)
+	// blocks, each writing team name, CT/T wins (m_iNumCTWins / m_iNumTerroristWins) and
+	// GetTeamBattlePoint. That is a third field beyond the fork's TeamScore message, so
+	// its wire format needs a decision before it is sent.
+}

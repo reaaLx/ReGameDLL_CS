@@ -874,9 +874,12 @@ protected:
 	short m_sNEO2PlantCount[2];		// count per C4 plant side (NEO 0x33c, 0x33e)
 	short m_sNEO2BattlePoint[2];		// cached team battle points: [0] CT, [1] other (NEO 0x340, 0x342)
 	int m_iNEO2Extra[4];			// extra per-team sums used by GetTeamBattlePoint (NEO 0x328-0x334)
+	int m_iNEO2TallyGate;			// when 1, UpdateTeamDeathCounter does nothing (NEO 0x308); meaning not known yet
 	int GetAddTeamPointNum(int team);
 	int GetTeamBattlePoint(int team, bool current);
 	float TimeRemaining();
+	int CheckAliveCount(int team);
+	void UpdateTeamDeathCounter();
 	void UpdateTeamC4PlantedTime(bool planted_by_ct);
 	bool IsBeginnerMode();
 	bool IsClanBattleRule();

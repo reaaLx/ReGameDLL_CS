@@ -389,6 +389,7 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	}
 	for (int i = 0; i < 4; i++)
 		m_iNEO2Extra[i] = 0;
+	m_iNEO2TallyGate = 0;
 
 	m_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
 	RefreshSkillData();
