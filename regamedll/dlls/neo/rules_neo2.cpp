@@ -14,6 +14,7 @@
 // NEO's charge check multiplies the threshold by this constant (60.0).
 static const float NEO2_CHARGE_WINDOW = 60.0f;
 
+// Team index used by the team-battle helpers (matches TeamName::CT).
 // NEO 2 rule modes used by the predicates below.
 enum
 {
@@ -155,4 +156,51 @@ void CHalfLifeMultiplay::InitializeNEO2Rule()
 		g_engfuncs.pfnCVarSetFloat("mp_maxaccount", 16000.0f);
 		g_engfuncs.pfnCVarSetFloat("mp_startmoney", 800.0f);
 	}
+}
+
+int CHalfLifeMultiplay::GetAddTeamPointNum(int team)
+{
+	// Returns the count for the opposite team: the terrorist count for CT, else the CT count.
+	return (team == CT) ? m_iNumTerrorist : m_iNumCT;
+}
+
+int CHalfLifeMultiplay::GetTeamBattlePoint(int team, bool current)
+{
+	if (m_iNEO2RoundCount == 0)
+		return 0;
+
+	int total;
+	if (current)
+	{
+		if (team == CT)
+		{
+			total = m_iNEO2Extra[3] + m_iNEO2Extra[2] + m_iNEO2Tallies[6] + m_iNEO2Tallies[7];
+			m_sNEO2BattlePoint[0] = static_cast<short>(total);
+		}
+		else
+		{
+			total = m_iNEO2Tallies[4] + m_iNEO2Tallies[5] + m_iNEO2Extra[0] + m_iNEO2Extra[1];
+			m_sNEO2BattlePoint[1] = static_cast<short>(total);
+		}
+		return total;
+	}
+
+	return (team == CT) ? m_sNEO2BattlePoint[0] : m_sNEO2BattlePoint[1];
+}
+
+float CHalfLifeMultiplay::TimeRemaining()
+{
+	return GetRoundRemainingTime();
+}
+
+void CHalfLifeMultiplay::UpdateTeamC4PlantedTime(bool planted_by_ct)
+{
+	if (m_iNEO2RoundCount == 0)
+		return;
+
+	int remaining = static_cast<int>(TimeRemaining());
+	int side = planted_by_ct ? 1 : 0;
+
+	m_sNEO2PlantTime[side] = static_cast<short>(m_sNEO2PlantTime[side] + remaining);
+	m_sNEO2PlantCount[side] = static_cast<short>(m_sNEO2PlantCount[side] + 1);
 }

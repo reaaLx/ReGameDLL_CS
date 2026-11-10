@@ -381,6 +381,14 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	for (int i = 0; i < 8; i++) m_iNEO2Tallies[i] = 0;
 	m_iNEO2Parameter = 0;
 	m_bNEO2Flag = false;
+	for (int i = 0; i < 2; i++)
+	{
+		m_sNEO2PlantTime[i] = 0;
+		m_sNEO2PlantCount[i] = 0;
+		m_sNEO2BattlePoint[i] = 0;
+	}
+	for (int i = 0; i < 4; i++)
+		m_iNEO2Extra[i] = 0;
 
 	m_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
 	RefreshSkillData();
