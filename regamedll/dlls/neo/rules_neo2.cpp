@@ -243,3 +243,33 @@ void CHalfLifeMultiplay::UpdateTeamDeathCounter()
 	// GetTeamBattlePoint. That is a third field beyond the fork's TeamScore message, so
 	// its wire format needs a decision before it is sent.
 }
+
+// The original reads these from a per-player CCRM (keys 0 and 1). Here they use the
+// fork's existing per-player stats (frags and deaths) instead.
+int CHalfLifeMultiplay::CheckKillCount(int team)
+{
+	int total = 0;
+	CBaseEntity *pEntity = UTIL_FindEntityByClassname(NULL, "player");
+	while (pEntity && !FNullEnt(pEntity->edict()))
+	{
+		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pEntity);
+		if (pPlayer && static_cast<int>(pPlayer->m_iTeam) == team)
+			total += static_cast<int>(pPlayer->pev->frags);
+		pEntity = UTIL_FindEntityByClassname(pEntity, "player");
+	}
+	return total;
+}
+
+int CHalfLifeMultiplay::CheckDeathCount(int team)
+{
+	int total = 0;
+	CBaseEntity *pEntity = UTIL_FindEntityByClassname(NULL, "player");
+	while (pEntity && !FNullEnt(pEntity->edict()))
+	{
+		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pEntity);
+		if (pPlayer && static_cast<int>(pPlayer->m_iTeam) == team)
+			total += pPlayer->m_iDeaths;
+		pEntity = UTIL_FindEntityByClassname(pEntity, "player");
+	}
+	return total;
+}

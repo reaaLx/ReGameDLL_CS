@@ -879,6 +879,8 @@ protected:
 	int GetTeamBattlePoint(int team, bool current);
 	float TimeRemaining();
 	int CheckAliveCount(int team);
+	int CheckKillCount(int team);
+	int CheckDeathCount(int team);
 	void UpdateTeamDeathCounter();
 	void UpdateTeamC4PlantedTime(bool planted_by_ct);
 	bool IsBeginnerMode();
