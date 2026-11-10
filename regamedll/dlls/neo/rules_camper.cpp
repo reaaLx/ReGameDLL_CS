@@ -8,6 +8,7 @@
 #include "precompiled.h"
 #include "neo/rules.h"
 #include "weapons.h"
+#include "client.h"
 
 void CCamperRules::Initialize(CBasePlayer *pPlayer)
 {
@@ -28,8 +29,10 @@ void CCamperRules::Initialize(CBasePlayer *pPlayer)
 
 		m_iPrevCampType[idx] = -1;
 
-		// NEO also broadcasts a "Camper" user message (player index, 0) here.
-		// Not sent yet: the NEO-only message list needs a decision first.
+		MESSAGE_BEGIN(MSG_ALL, gmsgCamper);
+			WRITE_SHORT(pPlayer->entindex());
+			WRITE_SHORT(0);
+		MESSAGE_END();
 	}
 	else
 	{
@@ -63,6 +66,8 @@ void CCamperRules::End(int flag)
 // Thresholds and the think interval are guessed from the binary's constants:
 // the zone scan uses the same flag bits and comparisons, see the notes in Think.
 static const float CAMPER_THINK_INTERVAL = 1.0f;
+static const float CAMPER_RATE_NUMERATOR = 220.0f;
+static const float CAMPER_RATE_DIVISOR = 30.0f;
 
 // Returns true when the given zone applies to the player this frame.
 static bool CamperZoneActive(CBasePlayer *pPlayer, int zone, int ruleFlags)
@@ -196,9 +201,81 @@ void CCamperRules::Think()
 
 		const float spread = static_cast<float>(sqrt(varX + varY + varZ));
 
-		// Stage 2 (camp timers, level changes and the Camper/Radar messages) uses
-		// activeBits, curZone and spread. Not written yet.
-		(void)activeBits;
-		(void)spread;
+		// Camp timers. Each zone gains camp time while the player is stationary in it,
+		// and decays otherwise. No-camp time resets while in the zone.
+		for (int z = 0; z < 4; z++)
+		{
+			if (activeBits & (1 << z))
+			{
+				m_fCamp[p][z] += (CAMPER_RATE_NUMERATOR - spread) / CAMPER_RATE_DIVISOR;
+				m_fNoCampTime[p][z] = 0.0f;
+			}
+			else
+			{
+				m_fCamp[p][z] -= CAMPER_THINK_INTERVAL;
+				m_fNoCampTime[p][z] += CAMPER_THINK_INTERVAL;
+			}
+
+			if (m_fCamp[p][z] < 0.0f)
+				m_fCamp[p][z] = 0.0f;
+			else if (m_fCamp[p][z] > 100.0f)
+				m_fCamp[p][z] = 100.0f;
+
+			if (m_fNoCampTime[p][z] > 20.0f)
+			{
+				const float camp = m_fCamp[p][z];
+				if (camp < 33.0f)
+					m_iCampLevel[p][z] = 0;
+				else if (camp < 66.0f)
+					m_iCampLevel[p][z] = 1;
+				else if (camp < 100.0f)
+					m_iCampLevel[p][z] = 2;
+				else
+					m_iCampLevel[p][z] = 3;
+			}
+		}
+
+		if (activeBits == 0)
+			continue;
+
+		// Warnings for the current zone. A level-2 camper at full camp time is penalised.
+		const float camp = m_fCamp[p][curZone];
+		int &level = m_iCampLevel[p][curZone];
+
+		if (camp >= 100.0f && level == 2)
+		{
+			level = 3;
+			pPlayer->HintMessage("#Camper_Penalty", TRUE, TRUE);
+			pPlayer->m_iCamperFlag |= 0x10;
+
+			MESSAGE_BEGIN(MSG_ALL, gmsgCamper);
+				WRITE_SHORT(i);
+				WRITE_SHORT(1);
+			MESSAGE_END();
+
+			MESSAGE_BEGIN(MSG_ALL, gmsgRadar);
+				WRITE_BYTE(i);
+				WRITE_COORD(pPlayer->pev->origin.x);
+				WRITE_COORD(pPlayer->pev->origin.y);
+				WRITE_COORD(pPlayer->pev->origin.z);
+			MESSAGE_END();
+
+			// The original also counts this on the player's CCRM (key 46). The fork's
+			// player has no CCRM, so that counter is not kept here.
+			continue;
+		}
+
+		bool bump;
+		if (camp >= 66.0f)
+			bump = (level <= 1);
+		else
+			bump = (camp >= 33.0f && level <= 0);
+
+		if (bump)
+		{
+			level++;
+			static const char *zoneText[4] = { "#Camper_C4Set", "#Camper_C4defuse", "#Camper_C4Get", "#Camper_Peace" };
+			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, zoneText[curZone]);
+		}
 	}
 }

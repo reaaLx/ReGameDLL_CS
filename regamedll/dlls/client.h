@@ -257,6 +257,7 @@ extern int gmsgReloadSound;
 extern int gmsgCrosshair;
 extern int gmsgNVGToggle;
 extern int gmsgRadar;
+extern int gmsgCamper;
 extern int gmsgSpectator;
 extern int gmsgVGUIMenu;
 extern int gmsgCZCareer;
