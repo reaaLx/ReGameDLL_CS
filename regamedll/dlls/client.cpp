@@ -49,6 +49,7 @@ int gmsgCrosshair = 0;
 int gmsgNVGToggle = 0;
 int gmsgRadar = 0;
 int gmsgCamper = 0;
+int gmsgGameRule = 0;
 int gmsgSpectator = 0;
 int gmsgVGUIMenu = 0;
 int gmsgCZCareer = 0;
@@ -194,6 +195,7 @@ void LinkUserMessages()
 	gmsgNVGToggle     = REG_USER_MSG("NVGToggle", 1);
 	gmsgRadar         = REG_USER_MSG("Radar", 7);
 	gmsgCamper        = REG_USER_MSG("Camper", 4);
+	gmsgGameRule      = REG_USER_MSG("GameRule", 1);
 	gmsgSpectator     = REG_USER_MSG("Spectator", 2);
 	gmsgVGUIMenu      = REG_USER_MSG("VGUIMenu", -1);
 	gmsgTutorText     = REG_USER_MSG("TutorText", -1);

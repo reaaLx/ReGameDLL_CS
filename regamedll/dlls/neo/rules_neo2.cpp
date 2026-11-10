@@ -33,9 +33,12 @@ void CHalfLifeMultiplay::SetNEO2RuleMode(int mode)
 	m_iNEO2RuleMode = mode;
 	g_engfuncs.pfnSetNEO2Rule(mode);
 
-	// NEO also broadcasts a "GameRule" user message carrying the mode in one byte.
-	// Not sent yet: the NEO-only message list needs a decision first (see
-	// NEO_PORT_SCOPE.md).
+	if (gmsgGameRule != 0)
+	{
+		MESSAGE_BEGIN(MSG_ALL, gmsgGameRule);
+			WRITE_BYTE(mode);
+		MESSAGE_END();
+	}
 }
 
 int CHalfLifeMultiplay::CheckNEO2RuleforChargeOnly5()
