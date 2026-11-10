@@ -6,7 +6,6 @@
 #include "training_gamerules.h"
 #include "neo/neo_stub.h"
 
-int CHalfLifeMultiplay::CheckNEO2Rule() { NEO_STUB("CHalfLifeMultiplay::CheckNEO2Rule"); return {}; }
 void CCSBot::TacticalGrenade() { NEO_STUB("CCSBot::TacticalGrenade"); }
 void CCSBot::TacticalMove() { NEO_STUB("CCSBot::TacticalMove"); }
 void CCSBot::TacticalWait() { NEO_STUB("CCSBot::TacticalWait"); }

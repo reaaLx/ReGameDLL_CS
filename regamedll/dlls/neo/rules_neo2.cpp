@@ -272,3 +272,279 @@ int CHalfLifeMultiplay::CheckDeathCount(int team)
 	}
 	return total;
 }
+
+// Per-round rule evaluation. Dispatches on m_iNEO2RuleMode (NEO 0x2d0).
+// Returns the round state: 0 = none, 1..7 = decided outcome codes.
+int CHalfLifeMultiplay::CheckNEO2Rule()
+{
+	int state = 0;
+	const float now = gpGlobals->time;
+	const int limit = m_iNEO2RoundLimit;
+	int *t = m_iNEO2Tallies;
+
+	if (m_iNEO2Field6c <= 0)
+		return 0;
+
+	m_iNEO2RoundCount++;
+
+	if (m_iNEO2Field6c == 2 || m_iNEO2Field6c == 4 || m_iNEO2Field6c == 8)
+	{
+		if (m_iNEO2ChargeFlag == 1) t[1]++; else t[0]++;
+	}
+	else if (m_iNEO2Field6c == 1 || m_iNEO2Field6c == 5 || m_iNEO2Field6c == 6 || m_iNEO2Field6c == 7)
+	{
+		if (m_iNEO2ChargeFlag == 1) t[3]++; else t[2]++;
+	}
+
+	// Common outcome tail: record the state, mark the tallies gate, and latch the round start.
+	auto decide = [&](int next) { state = next; m_iNEO2TallyGate = 1; m_fRoundStartTime = now; };
+	// Charge-latch: set the charge flag, then the same tail.
+	auto latchCharge = [&](int next) { m_iNEO2ChargeFlag = 1; decide(next); };
+	// Compares two wins-style tallies: first > second -> 4, second > first -> 5, else 6.
+	auto compareTallies = [&](int first, int second) { if (first > second) decide(4); else if (second > first) decide(5); else decide(6); };
+
+	switch (m_iNEO2RuleMode)
+	{
+	case 1:
+	case 10:
+	{
+		if (!IsBombPlanted())
+		{
+			if (TimeRemaining() <= 0.0f)
+			{
+				if (m_iNEO2ChargeFlag == 0) t[6] += GetAddTeamPointNum(CT);
+				else t[7] += GetAddTeamPointNum(CT);
+			}
+			if (CheckAliveCount(CT) <= 0)
+			{
+				if (m_iNEO2ChargeFlag == 0) t[4] += GetAddTeamPointNum(TERRORIST);
+				else t[5] += GetAddTeamPointNum(TERRORIST);
+				UpdateTeamC4PlantedTime(m_iNEO2ChargeFlag != 0);
+			}
+		}
+
+		if (m_iNEO2ChargeFlag != 1)
+		{
+			state = 1;
+			if (limit > 0 && m_iNEO2RoundCount == limit)
+			{
+				UpdateTeamDeathCounter();
+				latchCharge(2);
+			}
+		}
+		else if (limit > 0)
+		{
+			state = 3;
+			const int a = t[3] + t[0];
+			const int b = t[2] + t[1];
+			if (a == limit + 1)
+			{
+				UpdateTeamDeathCounter();
+				GetTeamBattlePoint(CT, true);
+				GetTeamBattlePoint(TERRORIST, true);
+				decide(4);
+			}
+			else if (b == limit + 1)
+			{
+				UpdateTeamDeathCounter();
+				GetTeamBattlePoint(CT, true);
+				GetTeamBattlePoint(TERRORIST, true);
+				decide(5);
+			}
+			else if (a == limit && b == limit)
+			{
+				UpdateTeamDeathCounter();
+				const int ct = GetTeamBattlePoint(CT, true);
+				const int tt = GetTeamBattlePoint(TERRORIST, true);
+				if (ct > tt) state = 4;
+				else if (ct < tt) state = 5;
+				else
+				{
+					const int avg0 = (m_sNEO2PlantCount[0] != 0) ? m_sNEO2PlantTime[0] / m_sNEO2PlantCount[0] : 0;
+					const int avg1 = (m_sNEO2PlantCount[1] != 0) ? m_sNEO2PlantTime[1] / m_sNEO2PlantCount[1] : 0;
+					state = (avg0 > avg1) ? 4 : 5;
+				}
+				decide(state);
+			}
+		}
+
+		UpdateTeamScores();
+		return state;
+	}
+
+	case 2:
+	{
+		const int thr = m_iNEO2Threshold;
+		if (m_iNEO2ChargeFlag != 1)
+		{
+			state = 1;
+			if (t[0] >= thr || t[2] >= thr)
+				latchCharge(2);
+		}
+		else
+		{
+			state = 3;
+			if (t[1] >= thr || t[3] >= thr)
+			{
+				const int a = t[3] + t[0];
+				const int b = t[2] + t[1];
+				if (a > b) decide(4);
+				else if (b > a) decide(5);
+				else
+				{
+					const int kct = CheckKillCount(CT);
+					const int kt = CheckKillCount(TERRORIST);
+					if (kct > kt) state = 4;
+					else if (kt > kct) state = 5;
+					else
+					{
+						const int dct = CheckDeathCount(CT);
+						const int dt = CheckDeathCount(TERRORIST);
+						if (dct < dt) state = 4;
+						else if (dt < dct) state = 5;
+						else state = 6;
+					}
+					decide(state);
+				}
+			}
+		}
+		return state;
+	}
+
+	case 3:
+	{
+		m_flNEO2ChargeAnchor += now - m_fRoundStartTime;
+		const float thr = m_flNEO2ChargeThreshold;
+		if (m_iNEO2ChargeFlag != 1)
+		{
+			state = 1;
+			if (m_flNEO2ChargeAnchor >= thr * 60.0f)
+				latchCharge(7);
+		}
+		else
+		{
+			state = 3;
+			if (m_flNEO2ChargeAnchor >= (thr + thr) * 60.0f)
+				compareTallies(t[0], t[1]);
+		}
+		return state;
+	}
+
+	case 4:
+	{
+		m_flNEO2ChargeAnchor += now - m_fRoundStartTime;
+		const float thr = m_flNEO2ChargeThreshold;
+		if (m_iNEO2ChargeFlag != 1)
+		{
+			state = 1;
+			const char *next = g_engfuncs.pfnTakaGetNextLevelName();
+			if (next != NULL || m_flNEO2ChargeAnchor >= thr * 60.0f)
+				latchCharge(2);
+		}
+		else
+		{
+			state = 3;
+			const char *next = g_engfuncs.pfnTakaGetNextLevelName();
+			const bool counts = (next != NULL && *next != '\0');
+			if (counts || m_flNEO2ChargeAnchor >= (thr + thr) * 60.0f)
+				compareTallies(t[3] + t[0], t[2] + t[1]);
+		}
+		return state;
+	}
+
+	case 5:
+	{
+		if (limit <= 0 || m_iNEO2RoundCount != (limit / 2) + (limit % 2))
+			return 0;
+		compareTallies(m_iNumTerroristWins, m_iNumCTWins);
+		return state;
+	}
+
+	case 6:
+	{
+		if (limit <= 0 || m_iNEO2RoundCount != limit / 2)
+			return 0;
+		compareTallies(m_iNumTerroristWins, m_iNumCTWins);
+		return state;
+	}
+
+	case 7:
+	{
+		if (limit <= 0 || m_iNEO2RoundCount != limit)
+			return 0;
+		compareTallies(m_iNumTerroristWins, m_iNumCTWins);
+		return state;
+	}
+
+	case 8:
+	{
+		if (m_iNEO2ChargeFlag == 0)
+		{
+			state = 1;
+			if (limit <= 0 || m_iNEO2RoundCount != limit)
+				return state;
+			m_iNEO2ChargeFlag = 1;
+			state = 2;
+			m_iNEO2TallyGate = 1;
+			m_fRoundStartTime = now;
+			m_iNEO2VIPFlag = 0;
+			m_iNEO2Unk0bc = 0;
+			return state;
+		}
+
+		if (limit <= 0 || m_iNEO2RoundCount < limit + limit)
+			return 0;
+		state = 3;
+		const int a = t[3] + t[0];
+		const int b = t[2] + t[1];
+		if (a >= limit + 1)
+			decide(4);
+		else if (b >= limit + 1)
+			decide(5);
+		else if (a == limit && b == limit)
+		{
+			const int ka = 5 * t[6] + 10 * t[4] + CheckKillCount(CT);
+			const int kb = 5 * t[7] + 10 * t[5] + CheckKillCount(TERRORIST);
+			if (ka > kb) decide(4);
+			else if (ka < kb) decide(5);
+			else decide(6);
+		}
+		return state;
+	}
+
+	case 9:
+	{
+		if (m_iNEO2ChargeFlag != 1)
+		{
+			state = 1;
+			if (limit <= 0 || m_iNEO2RoundCount != limit)
+				return state;
+			latchCharge(2);
+			return state;
+		}
+
+		if (limit <= 0 || m_iNEO2RoundCount < limit + limit)
+			return 0;
+		state = 3;
+		const int a = t[3] + t[0];
+		const int b = t[2] + t[1];
+		if (a >= limit + 1)
+			decide(4);
+		else if (b >= limit + 1)
+			decide(5);
+		else if (a == limit && b == limit)
+		{
+			const int ka = 5 * t[6] + 10 * t[4] + CheckKillCount(CT);
+			const int kb = 5 * t[7] + 10 * t[5] + CheckKillCount(TERRORIST);
+			if (ka > kb) decide(4);
+			else if (ka < kb) decide(5);
+			else decide(6);
+		}
+		return state;
+	}
+
+	default:
+		// Mode 0 and anything above 10 exit with state 0.
+		return 0;
+	}
+}

@@ -875,6 +875,10 @@ protected:
 	short m_sNEO2BattlePoint[2];		// cached team battle points: [0] CT, [1] other (NEO 0x340, 0x342)
 	int m_iNEO2Extra[4];			// extra per-team sums used by GetTeamBattlePoint (NEO 0x328-0x334)
 	int m_iNEO2TallyGate;			// when 1, UpdateTeamDeathCounter does nothing (NEO 0x308); meaning not known yet
+	int m_iNEO2Field6c;			// NEO 0x6c; gates CheckNEO2Rule and selects tally groups (writer not found yet)
+	int m_iNEO2RoundLimit;			// NEO 0x26c; round limit compared with m_iNEO2RoundCount
+	int m_iNEO2Threshold;			// NEO 0x274; tally threshold used in mode 2
+	int m_iNEO2Unk0bc;			// NEO 0xbc; cleared by mode 8, meaning not known yet
 	int GetAddTeamPointNum(int team);
 	int GetTeamBattlePoint(int team, bool current);
 	float TimeRemaining();
