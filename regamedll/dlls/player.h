@@ -863,6 +863,7 @@ public:
 	Vector m_vecAutoAim;
 	BOOL m_fOnTarget;
 	int m_iDeaths;
+	int m_iCamperFlag;			// NEO camper state bits (set by CCamperRules::Think; reset in Reset)
 	int m_izSBarState[SBAR_END];
 	float m_flNextSBarUpdateTime;
 	float m_flStatusBarDisappearDelay;

@@ -6,4 +6,3 @@
 void CBeginnerRule::KeyValue(KeyValueData_s*) { NEO_STUB("CBeginnerRule::KeyValue"); }
 void CBeginnerRule::Spawn() { NEO_STUB("CBeginnerRule::Spawn"); }
 void CBeginnerRule::BeginUse(CBaseEntity*, CBaseEntity*, USE_TYPE, float) { NEO_STUB("CBeginnerRule::BeginUse"); }
-void CCamperRules::Think() { NEO_STUB("CCamperRules::Think"); }

@@ -6166,6 +6166,7 @@ void CBasePlayer::Reset()
 {
 	pev->frags = 0;
 	m_iDeaths = 0;
+	m_iCamperFlag = 0;
 
 #ifndef REGAMEDLL_ADD
 	m_iAccount = 0;
