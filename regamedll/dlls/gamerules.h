@@ -893,6 +893,7 @@ protected:
 	bool IsTeamBattleRule();
 	bool IsTrainingMode();
 	void InitializeNEO2Rule();
+	void RefreshNEO2Limits();
 };
 
 typedef struct mapcycle_item_s

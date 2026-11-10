@@ -1701,6 +1701,8 @@ LINK_HOOK_CLASS_VOID_CUSTOM_CHAIN2(CHalfLifeMultiplay, CSGameRules, RestartRound
 
 void EXT_FUNC CHalfLifeMultiplay::__API_HOOK(RestartRound)()
 {
+	RefreshNEO2Limits();
+
 	// tell bots that the round is restarting
 	if (TheBots)
 	{
@@ -2425,6 +2427,7 @@ LINK_HOOK_CLASS_VOID_CUSTOM_CHAIN2(CHalfLifeMultiplay, CSGameRules, Think)
 
 void EXT_FUNC CHalfLifeMultiplay::__API_HOOK(Think)()
 {
+	RefreshNEO2Limits();
 	MonitorTutorStatus();
 	m_VoiceGameMgr.Update(gpGlobals->frametime);
 
