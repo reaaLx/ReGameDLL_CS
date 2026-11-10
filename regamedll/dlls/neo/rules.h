@@ -25,4 +25,23 @@ public:
     void BeginUse(CBaseEntity*, CBaseEntity*, USE_TYPE, float);
 };
 
+struct CCamperRules {
+private:
+    BOOL m_bAble;
+    int m_iFlag;
+    Vector m_sCoord[32][5];
+    float m_fCamp[32][4];
+    int m_iCampLevel[32][4];
+    float m_fNextThink;
+    int m_iPrevCampType[32];
+    float m_fNoCampTime[32][4];
+public:
+    void Initialize(CBasePlayer*);
+    void Enable();
+    void Disable();
+    void Start(int);
+    void End(int);
+    void Think();
+};
+
 #endif  // NEO_RULES_H

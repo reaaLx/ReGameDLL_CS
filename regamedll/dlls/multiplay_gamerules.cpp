@@ -371,6 +371,16 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_flNEO2ChargeAnchor = 0.0f;
 	m_iNEO2ChargeFlag = 0;
 	m_flNEO2ChargeThreshold = 0.0f;
+	m_iNEO2BeginnerMode = 0;
+	m_iNEO2TrainingMode = 0;
+	for (int i = 0; i < 6; i++) m_iNEO2Counters[i] = 0;
+	m_iNEO2VIPFlag = 0;
+	m_iNEO2VIPSlot0 = 0;
+	m_iNEO2VIPSlot1 = 0;
+	m_iNEO2RoundCount = 0;
+	for (int i = 0; i < 8; i++) m_iNEO2Tallies[i] = 0;
+	m_iNEO2Parameter = 0;
+	m_bNEO2Flag = false;
 
 	m_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
 	RefreshSkillData();

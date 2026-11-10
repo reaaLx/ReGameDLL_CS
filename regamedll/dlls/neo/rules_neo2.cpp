@@ -1,16 +1,31 @@
 /*
  * NEO 2 rule helpers on CHalfLifeMultiplay.
  *
- * Behaviour observed from NEO's CHalfLifeMultiplay::SetNEO2RuleMode and
- * CHalfLifeMultiplay::CheckNEO2RuleforChargeOnly5. Clean-room: written from the
- * observed logic, not transcribed from disassembly.
+ * Written from the observed behaviour of NEO's SetNEO2RuleMode,
+ * CheckNEO2RuleforChargeOnly5, InitializeNEO2Rule and the rule predicates.
+ * Clean-room: no code transcribed from disassembly.
  */
 #include "precompiled.h"
 #include "gamerules.h"
+#include "neo/rules.h"
+#include "neo/crm.h"
+#include "neo/popup.h"
 
-// NEO's charge check multiplies the threshold by this constant (60.0, from the NEO
-// binary's read-only data).
+// NEO's charge check multiplies the threshold by this constant (60.0).
 static const float NEO2_CHARGE_WINDOW = 60.0f;
+
+// NEO 2 rule modes used by the predicates below.
+enum
+{
+	NEO2_MODE_TEAM_FIRST = 1,	// team battle modes are 1..3
+	NEO2_MODE_TEAM_LAST = 3,
+	NEO2_MODE_NORMAL = 4,
+	NEO2_MODE_BEGINNER_FIRST = 5,	// beginner modes are 5..7
+	NEO2_MODE_BEGINNER_LAST = 7,
+	NEO2_MODE_TRAINING = 8,
+	NEO2_MODE_STORE_WAR = 9,
+	NEO2_MODE_CLAN = 10,
+};
 
 void CHalfLifeMultiplay::SetNEO2RuleMode(int mode)
 {
@@ -41,4 +56,103 @@ int CHalfLifeMultiplay::CheckNEO2RuleforChargeOnly5()
 		return 1;
 
 	return 0;
+}
+
+bool CHalfLifeMultiplay::IsBeginnerMode()
+{
+	return m_iNEO2BeginnerMode != 0;
+}
+
+bool CHalfLifeMultiplay::IsClanBattleRule()
+{
+	return m_iNEO2RuleMode == NEO2_MODE_CLAN;
+}
+
+bool CHalfLifeMultiplay::IsNormalBattleRule()
+{
+	return m_iNEO2RuleMode == NEO2_MODE_NORMAL;
+}
+
+bool CHalfLifeMultiplay::IsStoreWarRule()
+{
+	return m_iNEO2RuleMode == NEO2_MODE_STORE_WAR;
+}
+
+bool CHalfLifeMultiplay::IsTeamBattleRule()
+{
+	return m_iNEO2RuleMode >= NEO2_MODE_TEAM_FIRST && m_iNEO2RuleMode <= NEO2_MODE_TEAM_LAST;
+}
+
+bool CHalfLifeMultiplay::IsTrainingMode()
+{
+	return m_iNEO2TrainingMode != 0;
+}
+
+void CHalfLifeMultiplay::InitializeNEO2Rule()
+{
+	m_iNEO2RoundCount = 0;
+	m_flNEO2ChargeAnchor = 0.0f;
+	m_iNEO2ChargeFlag = 0;
+	m_bNEO2Flag = false;
+	for (int i = 0; i < 8; i++)
+		m_iNEO2Tallies[i] = 0;
+	m_iNEO2Parameter = 3;
+	for (int i = 0; i < 6; i++)
+		m_iNEO2Counters[i] = 0;
+
+	SetNEO2RuleMode(g_engfuncs.pfnGetNEO2Rule());
+
+	m_iNEO2BeginnerMode = (m_iNEO2RuleMode >= NEO2_MODE_BEGINNER_FIRST && m_iNEO2RuleMode <= NEO2_MODE_BEGINNER_LAST) ? 1 : 0;
+	m_iNEO2TrainingMode = (m_iNEO2RuleMode == NEO2_MODE_TRAINING) ? 1 : 0;
+
+	if (m_iNEO2VIPFlag != 0)
+		ResetCurrentVIP();
+	m_iNEO2VIPFlag = 0;
+	m_iNEO2VIPSlot0 = 0;
+	m_iNEO2VIPSlot1 = 0;
+
+	static CCamperRules camper;
+	camper.Initialize(NULL);
+	if (IsNormalBattleRule())
+		camper.Enable();
+	else
+		camper.Disable();
+
+	g_engfuncs.pfnCVarSetFloat("mp_clanbattle", (m_iNEO2RuleMode == NEO2_MODE_CLAN) ? 1.0f : 0.0f);
+	g_engfuncs.pfnCVarSetString("mp_neoclanname", "");
+	g_engfuncs.pfnCVarSetString("mp_neoclancode", "");
+	g_engfuncs.pfnCVarSetFloat("mp_neoclanrate", 2000.0f);
+	g_engfuncs.pfnCVarSetString("mp_csfclanname", "");
+	g_engfuncs.pfnCVarSetString("mp_csfclancode", "");
+	g_engfuncs.pfnCVarSetFloat("mp_csfclanrate", 2000.0f);
+
+	CCRM::ResetAll();
+	CPopup::ResetAll();
+
+	if (IsTeamBattleRule() || IsClanBattleRule())
+	{
+		g_engfuncs.pfnCVarSetFloat("mp_maxaccount", 25000.0f);
+		g_engfuncs.pfnCVarSetFloat("mp_startmoney", 25000.0f);
+		g_engfuncs.pfnCVarSetFloat("mp_autokick", 0.0f);
+		g_engfuncs.pfnCVarSetFloat("mp_tkpunish", 0.0f);
+	}
+	else if (IsBeginnerMode())
+	{
+		g_engfuncs.pfnCVarSetFloat("mp_maxaccount", 25000.0f);
+		g_engfuncs.pfnCVarSetFloat("mp_startmoney", 25000.0f);
+	}
+	else if (IsTrainingMode())
+	{
+		g_engfuncs.pfnCVarSetFloat("mp_maxaccount", 25000.0f);
+	}
+	else if (IsStoreWarRule())
+	{
+		g_engfuncs.pfnCVarSetFloat("mp_maxaccount", 16000.0f);
+		g_engfuncs.pfnCVarSetFloat("mp_startmoney", 15000.0f);
+	}
+	else
+	{
+		g_engfuncs.pfnCVarSetFloat("mp_maxaccount", 16000.0f);
+		g_engfuncs.pfnCVarSetFloat("mp_startmoney", 800.0f);
+	}
 }

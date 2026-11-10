@@ -860,6 +860,22 @@ protected:
 	float m_flNEO2ChargeAnchor;		// base time for the charge-window check (NEO 0x2d8)
 	int m_iNEO2ChargeFlag;			// charge flag used by CheckNEO2RuleforChargeOnly5 (NEO 0x2dc)
 	float m_flNEO2ChargeThreshold;		// threshold multiplier for the charge window (NEO 0x30c)
+	int m_iNEO2BeginnerMode;			// set when the mode is 5, 6 or 7 (NEO 0x2a4)
+	int m_iNEO2TrainingMode;			// set when the mode is 8 (NEO 0x2a8)
+	int m_iNEO2Counters[6];			// zeroed by InitializeNEO2Rule (NEO 0x288-0x29c)
+	int m_iNEO2VIPFlag;				// if set, ResetCurrentVIP runs on init (NEO 0x2b8)
+	int m_iNEO2VIPSlot0;				// zeroed by InitializeNEO2Rule (NEO 0x2b0)
+	int m_iNEO2VIPSlot1;				// zeroed by InitializeNEO2Rule (NEO 0x2b4)
+	int m_iNEO2RoundCount;			// zeroed by InitializeNEO2Rule (NEO 0x2d4)
+	int m_iNEO2Tallies[8];			// zeroed by InitializeNEO2Rule (NEO 0x2e0-0x2fc)
+	int m_iNEO2Parameter;			// set to 3 by InitializeNEO2Rule (NEO 0x304); meaning not known yet
+	bool m_bNEO2Flag;				// zeroed by InitializeNEO2Rule (NEO 0x35e)
+	bool IsBeginnerMode();
+	bool IsClanBattleRule();
+	bool IsNormalBattleRule();
+	bool IsStoreWarRule();
+	bool IsTeamBattleRule();
+	bool IsTrainingMode();
 	void InitializeNEO2Rule();
 };
 
